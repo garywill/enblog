@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Gary W&#39;s English blog</title>
+    <link>/enblog/post/</link>
+    <description>Recent content in Posts on Gary W&#39;s English blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>Copyright © All rights reserved</copyright>
+    <lastBuildDate>Fri, 25 Mar 2022 08:00:00 +0800</lastBuildDate><atom:link href="/enblog/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>MicroPython for ESP32-C3 2MiB-Flash</title>
+      <link>/enblog/post/mpy-esp32c3-2mflash/</link>
+      <pubDate>Fri, 25 Mar 2022 08:00:00 +0800</pubDate>
+      
+      <guid>/enblog/post/mpy-esp32c3-2mflash/</guid>
+      <description>
+        
+          
+            I compiled MicroPython MCU firmware for Espressif ESP32-C3 2MiB-Flash (MCU made by 乐鑫科技 Inc)
+https://github.com/larygwil/micropython/releases
+MicroPython 1.19 for ESP32-C3 2M Flash. Built with ESP-IDF v4.4.2
+All articles are original (except for those specially claimed) and copyrighted. Copying without permission is forbidden. Buy me a coffee Your donation will be an impetus for me!
+          
+          
+            &lt;p&gt;&lt;a href=&#34;/enblog/enblog/post/mpy-esp32c3-2mflash/&#34;&gt;Read More&lt;/a&gt;&lt;/p&gt;
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>Open Source Multi Search Engines Tools</title>
+      <link>/enblog/post/open-source-multi-search-engines-tools/</link>
+      <pubDate>Sat, 10 Jul 2021 08:00:00 +0800</pubDate>
+      
+      <guid>/enblog/post/open-source-multi-search-engines-tools/</guid>
+      <description>
+        
+          
+            Maybe you&#39;d also like to visit this page for more up-to-date info
+List / Comparison / Alternatives of open source web searching (multi-engines) tools Welcome PR if you want to add or correct any infomation
+Browser Extensions / Addons Browser addon Web app Build-in engines Categorize engines Search history reuse &amp;amp; manage HTTP POST Websites showing results by Ajax Provide input box User-custom engines Use browser-installed engines Context Menu Search Omnibox Drag to search In-web float panel Use many engines at once Sync settings by browser Firefox&#39;s searchbar - - &amp;lt;10 ❌ 🟢 ?
+          
+          
+            &lt;p&gt;&lt;a href=&#34;/enblog/enblog/post/open-source-multi-search-engines-tools/&#34;&gt;Read More&lt;/a&gt;&lt;/p&gt;
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>Assign DNS to one particular process on Linux</title>
+      <link>/enblog/post/dns/</link>
+      <pubDate>Sat, 17 Oct 2020 08:47:11 +0100</pubDate>
+      
+      <guid>/enblog/post/dns/</guid>
+      <description>
+        
+          
+            Linux itself can only configure system-wide DNS by /etc/resolv.conf. Here is a way to individually set DNS for a specific process, through the mount namespace without root. You only need a simple command if use a script.
+Method Bubblewrap is an unprivileged (root-free) container tool. We use bwrapcommand to use it to create a mount namespace so that the process under this namespace the see /etc/resolv.conf content overwritten by us.
+          
+          
+            &lt;p&gt;&lt;a href=&#34;/enblog/enblog/post/dns/&#34;&gt;Read More&lt;/a&gt;&lt;/p&gt;
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>We still have Firefox userChrome JS script in the 2020s (introduction, tutorial, resources)</title>
+      <link>/enblog/post/ucjs/</link>
+      <pubDate>Sun, 19 Jan 2020 08:47:11 +0100</pubDate>
+      
+      <guid>/enblog/post/ucjs/</guid>
+      <description>
+        
+          
+            Today ( 2022 update ) Firefox&#39;s userChrome script (uc script, for short) can still be used. We cannot know whether Mozilla will completely kill the uc script in a far or near future. People have been fearing about that in the past two years, but since 57, it is the uc script that make some people (such as me) don’t have (or temporarily not) give up Firefox to switch to another browser.
+          
+          
+            &lt;p&gt;&lt;a href=&#34;/enblog/enblog/post/ucjs/&#34;&gt;Read More&lt;/a&gt;&lt;/p&gt;
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>A page to display many Github repos, beyond the limit of 6 repos allowed</title>
+      <link>/enblog/post/github6/</link>
+      <pubDate>Thu, 19 Dec 2019 08:47:11 +0100</pubDate>
+      
+      <guid>/enblog/post/github6/</guid>
+      <description>
+        
+          
+            Github is a platform for many people to display their work, yet the profile page only allows to pin 6 repos.
+If you have more than 6 works which you want to show:
+Choose only the 6 ones you want to show the most, and reluctantly hide the others?
+Make another website to introduce your repo one by one?
+It&#39;s better to make a Github-style window display page by yourself, using the Github API directly to fetch and display the information of each repo, so you can display as many as you want, and it also saves the trouble of re-writing additional introductions for each work.
+          
+          
+            &lt;p&gt;&lt;a href=&#34;/enblog/enblog/post/github6/&#34;&gt;Read More&lt;/a&gt;&lt;/p&gt;
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>Quickly generate and decode QR codes in Linux terminals</title>
+      <link>/enblog/post/qr/</link>
+      <pubDate>Mon, 25 Feb 2019 08:00:00 +0800</pubDate>
+      
+      <guid>/enblog/post/qr/</guid>
+      <description>
+        
+          
+            We need to do two things:
+Decode QR code on Linux screen and print the result on terminal
+Convert a string to QR code on terminal, and display the QR code in the terminal for scanning
+Method Generating QR code
+qrencode is a common CLI program for generating QR codes, found in many distribution repositories. It supports outputing QR code in terminal. (It also supports output to image files)
+Decoding QR code
+          
+          
+            &lt;p&gt;&lt;a href=&#34;/enblog/enblog/post/qr/&#34;&gt;Read More&lt;/a&gt;&lt;/p&gt;
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>Create &#39;Open Terminal Here&#39; menu for Linux file manager</title>
+      <link>/enblog/post/terminal_here/</link>
+      <pubDate>Tue, 12 Jun 2018 08:47:11 +0100</pubDate>
+      
+      <guid>/enblog/post/terminal_here/</guid>
+      <description>
+        
+          
+            Create &amp;quot;Open Terminal Here&amp;quot; menu for Linux file manager Some Linux GUI file managers do not have a right-click menu &amp;quot;Open terminal here&amp;quot;, or some have but don&#39;t allow specifying a certain terminal.
+Because folder also has MIME type ( inode/directory), by associating folder with a terminal through MIME association, we can use the right-click menu in the file manager to select the terminal you want in &amp;quot;Open With&amp;quot;. (The premise is that there is &amp;quot;Open With&amp;quot; in the right-click menu of your file manager)
+          
+          
+            &lt;p&gt;&lt;a href=&#34;/enblog/enblog/post/terminal_here/&#34;&gt;Read More&lt;/a&gt;&lt;/p&gt;
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>Linux associate file name extension with opening program</title>
+      <link>/enblog/post/linux_associate_suffix/</link>
+      <pubDate>Wed, 06 Dec 2017 08:47:11 +0100</pubDate>
+      
+      <guid>/enblog/post/linux_associate_suffix/</guid>
+      <description>
+        
+          
+            Manually associate file extensions and open programs for Linux.
+When Linux does not recognize a certain extension, we need to create a MIME type for the extension. Linux decides opening program by MIME type, not directly file name extension.
+Then we associate this MIME type with a program menu item.
+Manual associate steps Create a MIME type for the file name extension
+If your Linux already recognizes this extension, you don&#39;t need to do this step.
+          
+          
+            &lt;p&gt;&lt;a href=&#34;/enblog/enblog/post/linux_associate_suffix/&#34;&gt;Read More&lt;/a&gt;&lt;/p&gt;
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

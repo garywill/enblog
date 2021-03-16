@@ -1,0 +1,831 @@
+This article is not for any special box model, most of the content has been 
+tested for Android 4.4 or above. (However, don’t play too much, 
+it’s not very useful.  I wish you a TV box that is 
+cost-effective and has good enough supporting for consumer (I don’t know if any available). Don’t waste time like this article. So many 
+troublesome things.)
+
+> If you install Android phone apps on Android TV box, it can be installed, and 95% can run. But maybe because it has not been optimized for the TV box hardware, it could be obvious laggy comparint to on  phone. And in many apps  video cannot be hard-decoded, then it occupies 99% of the CPU. And because of the different screen orientations, the display size strategy is different, so some of them are a little weird to use.
+> 
+> Therefore, some people say that it is not worthwhile to buy a smart TV box. It is better to buy a USB to HDMI converter for your mobile phone .
+> 
+> Or it is also good to use scrren casting from mobile phones to smart TV in the same LAN, which has been implemented by many apps.
+
+> This article assumes that readers know a certain degree of skill, the writing is relatively simple, and a bit messy, so it is not suitable for people who do not understand at all. If you are just a user consumer, most of this article is not suitable for you to read. I myself often use adb shell to operate Android devices on Linux, so this article will contain many command operations.
+
+This article is not specific to the box model. I currently have two devices:
+
+1. I bought a TV box delivered by a certain TV service, designed to only watch some of their programs.**Android 4.4** ,32-bit ARM7, the performance is just soso. 1G storage ROM. With network cable port and Wifi, two USBs.
+
+2. Also, a **Android 8** box. The official firmware has root. ARM64v8
+
+Here is a record (after rooting) installing some tool apps that technical people will like to use, mainly open source solutions, and some ways to cooperate with Android TV and computer (mostly Linux), including computer controlling TV, computer casting screen to TV , Mobile phone control TV and other strange tricks. There are also a few mentions of apps related to home media.
+
+**The mouse and keyboard still need to be prepared during the project** . Wireless would do better, we're in front of the TV in the living room. The USB socket is designed to insert a U disk to play movies, but you can also insert a mouse and keyboard.
+
+> Note for exFat and NTFS: After buying it, I found that this box does not support reading exFat U disks.  The manufacturer did not give money to MS, and (for the time being) did not use other third-party technologies, it is very likely that these two file systems will not be supported. So it's better to change exFat  to Fat32.
+> 
+> Fat32 is only limited to <32G when formatted under Windows, so find a Linux to format to support up to 8T. The maximum 4G of a single file.
+
+## Installing root manager on Android 4.4 TV
+
+The root steps varies by modals. Here's steps to install root managing app, to apply for root permissions for other apps
+
+> This method is not suitable for Android >= 5
+
+1. Prepare a `superuser.apk`(I use [com.koushikdutta.superuser](https://f-droid.org/packages/com.koushikdutta.superuser/) , [source code](https://github.com/koush/Superuser) )
+2. `adb shell mount -o rw,remount /system`
+3. Unzip `superuser.apk`, put `assets/armeabi/su` to  `/system/xbin/su`, and `chmod 755 /system/xbin/su`
+4. Installa `superuser.apk`
+5. Copy  `superuser.apk` in `/data/app/` to `/system/app/`
+6. Make `/system/xbin/su --daemon &` a command  that runs automatically when booting up. I found a startup shell script  file in the original manufacturer ROM and added it to the end of file.
+7. Reboot
+
+## Basic technical settings and installations for the Android TV box
+
+### Install SSH server, and switch adb in SSH
+
+There is no password for adb, and it is not safe to leave it open. 
+Install an SSH server that can set a password (here I use`net.xnano.android.sshserver`). 
+
+After logging in through SSH, you can use this command to switch adb:
+
+```
+# turn adbd off
+setprop service.adb.tcp.port -1
+killall  adbd
+
+# run adbd
+setprop service.adb.tcp.port 5555 （alternatively use another port, to prevent scanning）
+killall  adbd
+adbd & 
+```
+
+A bash scripts that can be used on PC to talk with this SSH server:
+
+```
+TV_IP=
+TV_SSH_USER=
+TV_SSH_PASSWORD=
+
+function ssh_cmd() {
+    local PID
+
+    local AS
+    local USER PASS IP PORT
+    AS=$1
+    IP=$2;  PORT=$3;  USER=$4;  PASS=$5;  shift;shift;shift;shift;shift
+
+    sshpass -p "$PASS"  ssh   ${USER}@${IP} -p $PORT -tt  << EOF &su  -c "$@" $ASEOF
+
+PID=$!
+sleep 5
+kill $PID
+}
+function tv_cmd() {
+    local AS=$1
+    shift
+    ssh_cmd $AS $TV_IP 2222 $TV_SSH_USER $TV_SSH_PASSWORD "$@"
+}
+
+# Examples:
+
+# open some url
+tv_cmd "shell" am start -a android.intent.action.VIEW -d <URL>
+
+# allow adb
+tv_cmd "root" "setprop service.adb.tcp.port 5555; killall  adbd; nohup adbd >/dev/null 2>&1  ; sleep 1"
+
+#  adb off
+tv_cmd "root" "setprop service.adb.tcp.port -1; killall  adbd"
+```
+
+In addition to the above solutions, sshd is also provided in Termux and its packages
+
+### Use App to switch network adb
+
+If it is troublesome to switch adb in the system settings, you can use some apps instead
+
+[com.matoski.adbm](https://f-droid.org/packages/com.matoski.adbm/) (or [com.github.sryze.wirebug](https://f-droid.org/packages/com.github.sryze.wirebug/) , or [siir.es.adbWireless](https://f-droid.org/packages/siir.es.adbWireless/) )
+
+### Terminal emulator and boot script
+
+There is already remote adb, but it’s okay to install a terminal on the TV
+
+[com.termoneplus](https://f-droid.org/packages/com.termoneplus/) or [jackpal.androidterm](https://f-droid.org/packages/jackpal.androidterm/)
+
+Or termux (Android >= 5)
+
+You can use Termux + Termux: Boot to implement a customized boot script
+
+### F-Droid client (old interface version)
+
+Install a third-party old interface version of F-Droid [eu.bubu1.fdroidclassic](https://f-droid.org/packages/eu.bubu1.fdroidclassic/) . The official App is too consuming for some old boxes.
+
+### Set apps banned or able to access the Internet
+
+AFWall+ (dev.ukanth.ufirewall) is good
+
+> For Android 4 has, use old version [2.9.9](https://github.com/ukanth/afwall/releases/tag/v2.9.9)
+
+### Lower the CPU/GPU frequency to deal with heating problem
+
+The heat dissipation of some boxes is really bad, if you haven’t bought a 
+fan, you can temporarily reduce the frequency appropriately
+
+```
+#!/data/data/com.termux/files/usr/bin/bash
+
+BASEPATH="/sys/devices/system/cpu"                                                                      
+
+for ((i=0; i<=3; i++))
+do                                                                  
+
+        su -c "echo conservative > $BASEPATH/cpu${i}/cpufreq/scaling_governor"
+        su -c "echo 50 > $BASEPATH/cpu${i}/cpufreq/conservative/down_threshold"
+        su -c "echo 99 > $BASEPATH/cpu${i}/cpufreq/conservative/up_threshold"
+done      
+```
+
+### Limit background apps to solve the laggging problem (and heat)
+
+Okay iOS is truely better. Android needs different procedures to restrict those apps.
+
+#### Revoke notification permissions
+
+System Settings -> Application -> Notification. Turn off the notification permissions of many apps.
+
+#### Revoke apps background running permission
+
+Tools for managing permissions (including hidden permissions) are:
+
+- AppOpsX
+- Permission Manager X
+- BackgroundRestrictor (this only manages `RUN_IN_BACKGROUND`permission)
+- App Manager
+- ADBungFu
+
+ADBungFu is an app with a weird name and interface, but its function seems to be very powerful. It is different from others. It can list apps according to their permissions, allowing you to turn them off in a targeted manner. Turn off the relevant background permissions of those bad apps.
+
+Also you can use command:
+
+```
+cmd appops set <package_name> RUN_IN_BACKGROUND ignore
+cmd appops set <package_name> RUN_ANY_IN_BACKGROUND ignore
+cmd appops set <package_name> START_FOREGROUND ignore
+cmd appops set <package_name> INSTANT_APP_START_FOREGROUND ignore
+```
+
+#### Restrict the background in the system developer settings
+
+You will find that none of the above is enough. So Android is still not good in this regard.
+
+Go to the developer mode menu -> background process limit, set the allowable number of backgrounds to 2 or so.
+
+> Do this after you have completed all the configuration of the box
+
+#### Kill and freeze background apps
+
+Use SuperFreezZ to clean the background. You can combine it with KeyMapper to add a remote shortcut key.
+
+There are more than one apps in market that is for cleaning background, but other apps we have to manually add to killing list. SuperFreezZ can be set to automatically add the newly installed apps to the list (so we have to manually add some trusted apps to the whitelist) .
+
+You can use App Manager to completely disable apps that have been installed and not used for long.
+
+## Home media
+
+### Player apps
+
+- Kodi is a playback device that has the functions of server and client, and all local area network media protocols such as nfs, smb, ftp, and http are supported.
+
+> The last version that supports Android 4 is version 16.
+
+- VLC. Everybody knows it.
+
+- DLNA (upnp) player (receiving end). There are several small apps on F-Droid that support this feature
+
+## Cast screen and cast sound from PC to TV(mostly Linux, partly applicable to Windows)
+
+What I’m talking about here is that the computer casts the screen to the TV.
+ If it’s a mobile phone (either iOS or Android) to the TV, there are already many solutions outside.
+
+### Cast audio from Linux to Android
+
+Here, nstead of delivering audio files, but real-time delivery of the audio being played by Linux.
+
+#### TCP transmission of raw audio stream
+
+Use Pulseaudio's module to use Linux as a tcp server for simple raw audio. 
+This solution has very little (almost no) audio delay 
+
+```fallback
+pactl load-module module-simple-protocol-tcp rate=48000 format=s16le channels=1 source=0 record=true 
+```
+
+The default port is 4711, `channel=1`means mono. Using `rate=48000` the network transmission needs about 100KB/s.
+
+If you want to stop, 
+
+```fallback
+pactl unload-module module-simple-protocol-tcp
+```
+
+> The technical documentation for this command is located on the [freedesktop page](https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/Modules/)
+
+Android uses Simple Protocol Player NG ( [fr.jakse.raphael.simpleprotocolplayer](https://f-droid.org/packages/fr.jakse.raphael.simpleprotocolplayer/) ) to receive audio. Type in the Linux IP and a few other parameters to receive playback
+
+> This method can also use Android phones as wireless headsets for computers. The premise is that the mobile phone supports the Wifi not to sleep after the screen is locked
+
+#### Use Apple AirPlay protocol
+
+Apple’s AirPlay protocol can cast screen and audio, which is familiar to Apple 
+users. Among them, the AirTunes protocol, which plays audio alone, uses 
+UDP.
+
+Android has some apps that support receiving AirPlay casting
+
+> Using Avahi Disvovery（ `avahi-discover` command, located in the package `python3-avahi-gtk`Middle) , you can see which receiving apps in LAN is broadcasting `_airplay._tcp`and `AirTunes Remote Audio`
+
+PulseAudio’s module RAOP (Remote Audio Output Protocol) implements audio AirTunes delivery, and its corresponding modules include `module-raop-sink`,  `module-raop-discover`.
+
+The RAOP implemented by PulseAudio needs to be enabled in the "PulseAudio Properties" ( `paprefs` command). In "Network Access", check "Make discoverable Apple AirTunes sound devices available locally" to enable.
+
+In addition, Avahi is required on Linux, start it with systemd first
+
+```fallback
+sudo systemctl start avahi-daemon.service
+```
+
+You may have to restart PulseAudio
+
+```fallback
+pulseaudio -k
+```
+
+To cast audio of a single Linux program, use the "Volume Control" of PulseAudio ( `pavucontrol` command). In "Playback", set the audio output of one program to the found AirTunes sink.
+
+> to be continued
+
+### Cast audio from Windows to Android
+
+- Windows can't directly use the Linux+PulseAudio solution above, for Windows does not have PulseAudio. Someone wrote a Windows program that implements the above functions: [https://github.com/kaytat/SimpleProtocolServer](https://github.com/kaytat/SimpleProtocolServer)
+
+- A [GeorgieLabs](http://georgielabs.net/) software dedicated to audio transmission over the network. His App for Android is [SoundWire](https://play.google.com/store/apps/details?id=com.georgie.SoundWireFree) , and need his software (Windows, Linux) running on  computer.
+
+## Mirroring scrren from Linux to Android
+
+The existing various ready-made screen projection solutions are not good enough for Linux support. The methods to get them are:
+
+- (Recommended) Streaming media solution (there are several solutions 
+  below, the recommended one is OBS Studio + RTSP + VLC, this solution is 
+  also applicable to Windows)
+
+- The VNC scheme can be used (VNC itself has **no sound** ).
+   If the resolution is lowered, ordinary video can barely be played (also
+   used with the above method of putting audio). When the picture changes 
+  greatly, the network speed is about 1400KB/s.
+
+- Cast a single picture through Airplay to see [https://github.com/openairplay/open-airplay](https://github.com/openairplay/open-airplay)
+
+### Streaming Media Casting Scheme[](http://localhost:1313/post/androidtv_temp/#流媒体投频方案)
+
+Needless to say, the advantages of the streaming media live screen solution are as follows:
+
+- Slightly higher CPU usage
+
+- There is a significant live broadcast delay, at least 3 seconds
+
+#### Streaming media real-time screen recording solution 1: OBS Studio (and push streaming)[](http://localhost:1313/post/androidtv_temp/#流媒体实时录屏方案一obs-studio-及推流)
+
+The
+ interface operation of OBS Studio is relatively clear and easy to 
+understand. Multiple monitors can choose to record only one screen.
+
+- Add "screen capture" as a video source
+
+- Select a computer to output audio in "Audio" of "Settings"
+
+- Set the video recording parameters in OBS Studio:
+  
+  In the "Output" of "Settings" in OBS Studio, if you adjust the 
+  "Output Mode" to "Advanced", the encoders you can choose (on my Linux 
+  laptop) are:
+  
+  - x264
+    
+    Can use the computer's multi-core CPU, but the overall CPU usage is large, so the heat is not small (here, it is 4 cores)
+    
+    CBR 200Kbps is enough
+  
+  - FFMPEG VAAPI (I used my Intel set display, Codec is H.264)
+    
+    The overall CPU occupancy is not too large, but the bit rate required is higher than x264
+    
+    CBR 3000Kbps is enough
+
+- Streaming video server (or push to the server):
+  
+  - Solution 1: Push stream to Nginx RTMP server (see separate section for server setup):
+    
+    - "Settings" "Push Streaming" "Services" select "Custom", the server fills in `rtmp://127.0.0.1/stream`(This one here `stream`Is
+       the stream name, if you want to change it, you need to make 
+      corresponding settings on the nginx side to allow push), the stream key 
+      can be left blank
+    
+    - Click "Start Push Stream"
+    
+    - Open the URL on the device at the end of the playback `rtmp://电脑IP/stream（这是串流名称）/串流密钥`(You can save if the key is empty)
+  
+  - Option 2: Use RTSP server plug-in (see separate section for plug-in installation):
+    
+    - "Tools" -> "RTSP Server" -> "Start"
+    
+    - Open the URL on the device at the end of the playback `rtsp://电脑IP:端口/live（这是串流名称）`
+  
+  above video servers **Choose one of the** to use. RTSP is recommended.
+
+#### Streaming media real-time screen recording solution 2: [Gnome Network Display](https://gitlab.gnome.org/GNOME/gnome-network-displays)[](http://localhost:1313/post/androidtv_temp/#流媒体实时录屏方案二gnome-network-displayhttpsgitlabgnomeorggnomegnome-network-displays)
+
+This
+ is an implementation of the Miracast protocol (also called Wi-Fi 
+Display). The software is in the experimental stage. The project 
+currently belongs to Gnome.
+
+According to the method for testing purposes in the instructions, it 
+can be used as an RTSP streaming server while recording the screen, and 
+the sound can be turned on through some operations of pulseaudio. 
+However, the test result is more card.
+
+#### Streaming server solution 1: RTSP streaming server plug-in installation of OBS Studio[](http://localhost:1313/post/androidtv_temp/#流服务器方案一obs-studio的rtsp流服务器插件安装)
+
+RTSP (Real Time Streaming Protocol) uses port 554 by default. This is a protocol standardized by Netscape by the IETF.
+
+The made by a Chinese is [GitHub-iamscottxu/obs-rtspserver: RTSP server plugin for obs-studio](https://github.com/iamscottxu/obs-rtspserver) very
+ practical. To install, just download the file and put it into the 
+corresponding location of the OBS plugin (test environment Linux 64-bit,
+ obs-rtspserver 1.3.0).
+
+After installing the OBS plug-in, click "Tools" -> "RTSP Server" 
+to open its operation interface, and you should change the port used.
+
+#### Streaming server solution 2: Build Nginx RTMP module[](http://localhost:1313/post/androidtv_temp/#流服务器方案二搭建nginx-rtmp-module)
+
+[RTMP (Real-Time Messaging Protocol)](https://zh.wikipedia.org/wiki/%E5%AE%9E%E6%97%B6%E6%B6%88%E6%81%AF%E5%8D%8F%E8%AE%AE) This protocol uses port 1935 by default, originally used by Macromedia Flash (Macromedia Flash Communications Server MX).
+
+OBS streaming and player access are all on port 1935 of the RTMP 
+server. The RTMP server on Linux generally uses the Nginx server with 
+the module [nginx-rtmp-module](https://github.com/arut/nginx-rtmp-module) .
+
+> If not in the release `nginx-rtmp-module`Package, you can use the mirror on Docker Hub, such as
+
+```fallback
+docker pull alfg/nginx-rtmp
+```
+
+```fallback
+docker run -it -p 1935:1935 -p 8080:80 --rm alfg/nginx-rtmp
+```
+
+[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Wrap")
+
+> (In the actual test, port 80 is not used, it is okay to not map it)
+
+#### Player software[](http://localhost:1313/post/androidtv_temp/#播放端软件)
+
+VLC can be used, here [VLC-Android-1.5.2 is used to](https://get.videolan.org/vlc-android/1.5.2/) play RTSP stream (if RTMP protocol is used, a higher version of VLC is required).
+
+> Entering the rtsp address in the VLC interface may fail to play, but using adb to open the rtsp address directly can play:
+
+```fallback
+am start -a android.intent.action.VIEW -d rtsp://xxxxx
+```
+
+[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Wrap")
+
+After testing, RTMP sometimes has the problem of audio and video out of sync, but RTSP does not.
+
+### VNC projection screen[](http://localhost:1313/post/androidtv_temp/#vnc投画面)
+
+This part **has only the picture and no sound** , which can be used in conjunction with the other section is a method of only casting audio.
+
+computer that uses the **current screen content** The VNC server on the as the source can be used:
+
+- vino (Gnome) (After testing, password verification and encrypted transmission cannot be used, only no secret)
+
+- krfb (KDE) (If it is a multi-monitor, only the main screen can be displayed)
+
+- rfb
+
+The following will only talk about the operation of vino on non-Gnome
+ desktops, because non-Gnome has no GUI. The other two have GUI
+
+#### Operations of vino on non-Gnome desktops[](http://localhost:1313/post/androidtv_temp/#vino在非gnome桌面的操作)
+
+After installing vino, if you are not using the Gnome desktop, you must enable it through the command (and its `vino`The binary program may not be in `$PATH`In the path) and operation.
+
+- View vino's settings
+
+```fallback
+ gsettings list-recursively org.gnome.Vino
+```
+
+[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")
+
+- Modify settings
+  
+  Modified to watch-only mode, which does not allow TV to operate the computer
+
+```fallback
+ gsettings set org.gnome.Vino view-only true
+```
+
+[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")
+
+(Optional) Change to watch without pop-up confirmation
+
+```fallback
+ gsettings set org.gnome.Vino prompt-enabled false
+```
+
+[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")
+
+You can also remove the password and encryption to improve fluency
+
+```fallback
+ org.gnome.Vino prompt-enabled false
+```
+
+```fallback
+ org.gnome.Vino require-encryption false
+```
+
+```fallback
+ org.gnome.Vino use-alternative-port false
+```
+
+```fallback
+ org.gnome.Vino disable-background false
+```
+
+```fallback
+ org.gnome.Vino disable-xdamage false
+```
+
+```fallback
+ org.gnome.Vino alternative-port uint16 5900
+```
+
+```fallback
+ org.gnome.Vino icon-visibility 'client'
+```
+
+```fallback
+ org.gnome.Vino authentication-methods ['none']
+```
+
+```fallback
+ org.gnome.Vino network-interface ''
+```
+
+```fallback
+ org.gnome.Vino notify-on-connect true
+```
+
+```fallback
+ org.gnome.Vino mailto ''
+```
+
+```fallback
+ org.gnome.Vino lock-screen-on-disconnect false
+```
+
+```fallback
+ org.gnome.Vino use-upnp false
+```
+
+```fallback
+ org.gnome.Vino vnc-password 'keyring'
+```
+
+```fallback
+ org.gnome.Vino view-only true
+```
+
+...
+
+[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle code block expand")
+
+- > The corresponding setting documents can be found on [this page](https://getadmx.com/?Category=CentrifyDC_GP_Extension&Policy=Centrify.Policies.CentrifyGnome3Settings::policy_1573)
+
+Start vino: `/usr/lib/vino/vino-server`. That is, you can use the VNC client on Android to connect.
+
+#### VNC client on Android[](http://localhost:1313/post/androidtv_temp/#android端的vnc客户端)
+
+Can use
+
+- [com.iiordanov.freebVNC](https://apt.izzysoft.de/fdroid/index/apk/com.iiordanov.freebVNC)
+
+- [com.coboltforge.dontmind.multivnc](https://apt.izzysoft.de/fdroid/index/apk/com.coboltforge.dontmind.multivnc?repo=archive) (1.8.10 支持Android 4)
+
+## Operate the side door of the TV[](http://localhost:1313/post/androidtv_temp/#操作电视的旁门左道)
+
+After
+ all, it is a TV box, it is impossible to keep the keyboard and mouse 
+connected, and the remote control is also very laborious. And some boxes
+ directly cut off some Android settings interface.
+
+### View and operate the Android screen on the computer[](http://localhost:1313/post/androidtv_temp/#在电脑上查看和操作android屏幕)
+
+#### Android 4[](http://localhost:1313/post/androidtv_temp/#android-4)
+
+- [Vysor](https://github.com/koush/vysor.io)
+  
+  Through adb. Install the App on the Android side, and use the client on the PC side to use the LAN adb.
+
+- AndroidScreencast on PC (open source, java)
+  
+  Communicate through the USB debugging interface (that is, adb), but this is very stuck
+
+#### Android >= 5[](http://localhost:1313/post/androidtv_temp/#android--5)
+
+There
+ is a famous scrcpy, which is open sourced by Genymotion, which 
+transmits images and remote control through adb. Someone made an 
+enhanced version of guiscrcpy.
+
+At this time, you may also need a Keyboard Switcher [com.kunzisoft.keyboard.switcher](https://f-droid.org/en/packages/com.kunzisoft.keyboard.switcher) , which can display a small floating icon, and you can use the mouse to click to switch the Android input method
+
+### Find some hidden App entrances in the box firmware[](http://localhost:1313/post/androidtv_temp/#找一些盒子固件隐藏的app入口)
+
+Use [de.szalkowski.activitylauncher to](https://f-droid.org/packages/de.szalkowski.activitylauncher/) view and call all activities under the App (in fact, this is not necessary)
+
+### Remote keyboard input method[](http://localhost:1313/post/androidtv_temp/#远程键盘输入法)
+
+1. WiFi keyboard [com.volosyukivan](https://f-droid.org/packages/com.volosyukivan/)
+
+2. ADB keyboard [com.android.adbkeyboard](https://f-droid.org/en/packages/com.android.adbkeyboard/)
+
+3. Telnet键盘 [de.onyxbits.remotekeyboard](https://f-droid.org/en/packages/de.onyxbits.remotekeyboard/) .
+
+或者用Keyboard Switcher [com.kunzisoft.keyboard.switcher](https://f-droid.org/en/packages/com.kunzisoft.keyboard.switcher)
+
+### Use [KDE Connect to](https://f-droid.org/packages/org.kde.kdeconnect_tp) control the TV with the keyboard on another Android phone (or computer)[](http://localhost:1313/post/androidtv_temp/#用kde-connecthttpsf-droidorgpackagesorgkdekdeconnect_tp在另一个android手机或电脑上用键盘控制电视)
+
+Install the same App on your mobile phone (there is also a computer version) and TV, and pair them.
+
+1. Select KDE Connect input method on the TV box
+   
+   And when its keyboard pops up, click the settings below and remove "Receive remote keys only when typing"
+
+2. The mobile phone is set as the control terminal, improperly controlled terminal
+   
+   After the mobile phone is paired, delete everything on the plug-in 
+   page, leaving only the "TV remote control" and "remote input" two
+   
+   > You can install on your mobile phone. [Hacker's Keyboard](https://f-droid.org/packages/org.pocketworkstation.pckeyboard/) or [BeHe Keyboard](https://f-droid.org/packages/com.vlath.keyboard/) These
+   >  two keyboards can provide more keys than ordinary mobile phone input 
+   > methods, such as ctrl, tab, alt, arrow keys, more convenient common 
+   > symbols and so on.
+
+### App for text transfer in LAN[](http://localhost:1313/post/androidtv_temp/#局域网传文本的app)
+
+Kouchat
+ can transmit text messages within the local area network without a 
+server, and it can be discovered automatically. Therefore, it can be 
+used to transfer a URL from a mobile phone or a computer to the TV. 
+Kouchat has an Android version and a PC java version.
+
+It's just that the Android TV version of the apps of many major video
+ sites have not registered themselves as the opening method of the URL 
+scheme.
+
+### Customize remote control actions or shortcut keys[](http://localhost:1313/post/androidtv_temp/#自定义遥控器动作或快捷键)
+
+[Keyboard/Button Mapper](https://f-droid.org/packages/io.github.sds100.keymapper) can be used to start App or other actions, after all, some buttons on the remote control do not have.
+
+### Floating tool[](http://localhost:1313/post/androidtv_temp/#浮动工具)
+
+Many TV box ROM **status bar** , **the Notifications panel** and **the desktop widgets** functions are **not** , so to find some floating gadgets on the screen
+
+- [Resource Monitor Mini](https://apkpure.com/cn/resource-monitor-mini/info.kfsoft.android.MemoryIndicator) CPU, memory (text). The CPU can be displayed with thin lines on the edge of the screen, which takes up less space and is clear.
+
+- [com.pies3nscy.cpuindicator](https://apkpure.com/cn/cpu-indicator/com.pies3nscy.cpuindicator) floating CPU, memory percentage circle
+
+- [com.toolbox.shortcuts](https://apkpure.com/cn/floating-toolbox/com.toolbox.shortcuts) A floating application launcher that can select several apps, it is scalable and suitable for using a mouse
+
+- [jc.floating.monitor](https://apkpure.com/cn/floating-network-monitor/jc.floating.monitor) floating network speed display (text)
+  
+  If you want to open the floating display directly from the command, use (root):
+
+```fallback
+am startservice jc.floating.monitor/.NetworkMonitor
+```
+
+[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")
+
+- [Tinycore](https://apkpure.com/cn/tinycore-cpu-ram-monitor/org.neotech.app.tinycore) displays an item in a bar at the edge of the screen (can be CPU, memory, temperature), no text
+
+- [Cpu Temperature](https://apkdl.net/en/com.kami.cputemp) simply floats and displays a temperature in text
+
+- [com.ccs.floating_info](https://apkpure.com/cn/c-floating/com.ccs.floating_info) Floating and scalable recent apps, memory monitoring, network monitoring. Plain text, and occupy a bit large area
+
+- Transparent CPU Monitor(skynet.transparentcpumonitor) CPU, GPU, memory
+  
+  The graph shown here is a bit huge. It itself takes up a certain 
+  amount of CPU. It can customize the reading path of each parameter, 
+  which is a bit useful when other App can’t read it.
+
+### A little commonly used adb command[](http://localhost:1313/post/androidtv_temp/#一点常用的adb命令)
+
+- adb start the app
+
+```fallback
+am start -n 包名/活动
+```
+
+[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")- You need to know the package name of the App and the name of the main activity
+
+- adb open url
+
+```fallback
+am start -a android.intent.action.VIEW -d http://xxxxxxx
+```
+
+[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Wrap")
+
+- adb input text
+
+```fallback
+input text hello
+```
+
+[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")
+
+- adb analog key/input
+
+```fallback
+input keyevent <keycode>
+```
+
+[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Copy Code")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")[](http://localhost:1313/post/androidtv_temp/# "Toggle Line Numbers")
+
+Reference https://developer.android.com/reference/android/view/KeyEvent
+
+```fallback
+input keyevent <keycode>
+```
+
+```fallback
+3    HOME 键 （一些遥控器的”本地“）
+```
+
+```fallback
+4    返回键
+```
+
+```fallback
+19  KEYCODE_DPAD_UP 導航鍵 向上 19 （遥控器方向键）
+```
+
+```fallback
+20  KEYCODE_DPAD_DOWN 導航鍵 向下 20
+```
+
+```fallback
+21  KEYCODE_DPAD_LEFT 導航鍵 向左 21
+```
+
+```fallback
+22  KEYCODE_DPAD_RIGHT 導航鍵 向右 22 
+```
+
+```fallback
+23  遥控器“OK”.  Directional Pad Center key. 
+```
+
+```fallback
+24    增加音量
+```
+
+```fallback
+25    降低音量
+```
+
+```fallback
+26    电源键
+```
+
+```fallback
+64    打开浏览器
+```
+
+```fallback
+66  ENTER
+```
+
+```fallback
+67  Backspace key.KEYCODE_DEL  遥控器”交换“
+```
+
+```fallback
+82    菜单键
+```
+
+```fallback
+83  KEYCODE_NOTIFICATION
+```
+
+```fallback
+85    播放/暂停
+```
+
+```fallback
+86    停止播放
+```
+
+```fallback
+87    播放下一首
+```
+
+```fallback
+88    播放上一首
+```
+
+```fallback
+92  PAGE UP
+```
+
+```fallback
+93  PAGE DOWN
+```
+
+```fallback
+111  ESCAPE
+```
+
+```fallback
+126    恢复播放
+```
+
+```fallback
+127    暂停播放
+```
+
+```fallback
+166  频道+（换台）
+```
+
+```fallback
+167  频道-
+```
+
+```fallback
+168  ZOOM_IN
+```
+
+```fallback
+169  ZOOM_OUT
+```
+
+```fallback
+176    打开系统设置
+```
+
+```fallback
+183  遥控器红键（直播）
+```
+
+```fallback
+184  遥控器绿键（回看）
+```
+
+```fallback
+185  遥控器黄键（点播）
+```
+
+```fallback
+186  遥控器蓝键（信息）
+```
+
+```fallback
+187    切换应用
+```
+
+```fallback
+223    系统休眠
+```
+
+```fallback
+224    点亮屏幕
+```
+
+```fallback
+226 KEYCODE_MEDIA_TOP_MENU 226
+```
+
+```fallback
+229  KEYCODE_LAST_CHANNEL  Last Channel key. Goes to the last viewed channel.
+```
+
+```fallback
+284  KEYCODE_ALL_APPS  284
+```

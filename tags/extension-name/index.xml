@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>extension name on Gary W&#39;s English blog</title>
+    <link>/enblog/tags/extension-name/</link>
+    <description>Recent content in extension name on Gary W&#39;s English blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>Copyright © All rights reserved</copyright>
+    <lastBuildDate>Wed, 06 Dec 2017 08:47:11 +0100</lastBuildDate><atom:link href="/enblog/tags/extension-name/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux associate file name extension with opening program</title>
+      <link>/enblog/post/linux_associate_suffix/</link>
+      <pubDate>Wed, 06 Dec 2017 08:47:11 +0100</pubDate>
+      
+      <guid>/enblog/post/linux_associate_suffix/</guid>
+      <description>
+        
+          
+            Manually associate file extensions and open programs for Linux.
+When Linux does not recognize a certain extension, we need to create a MIME type for the extension. Linux decides opening program by MIME type, not directly file name extension.
+Then we associate this MIME type with a program menu item.
+Manual associate steps Create a MIME type for the file name extension
+If your Linux already recognizes this extension, you don&#39;t need to do this step.
+          
+          
+            &lt;p&gt;&lt;a href=&#34;/enblog/enblog/post/linux_associate_suffix/&#34;&gt;Read More&lt;/a&gt;&lt;/p&gt;
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

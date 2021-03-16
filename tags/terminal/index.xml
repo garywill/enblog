@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>terminal on Gary W&#39;s English blog</title>
+    <link>/enblog/tags/terminal/</link>
+    <description>Recent content in terminal on Gary W&#39;s English blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>Copyright © All rights reserved</copyright>
+    <lastBuildDate>Mon, 25 Feb 2019 08:00:00 +0800</lastBuildDate><atom:link href="/enblog/tags/terminal/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Quickly generate and decode QR codes in Linux terminals</title>
+      <link>/enblog/post/qr/</link>
+      <pubDate>Mon, 25 Feb 2019 08:00:00 +0800</pubDate>
+      
+      <guid>/enblog/post/qr/</guid>
+      <description>
+        
+          
+            We need to do two things:
+Decode QR code on Linux screen and print the result on terminal
+Convert a string to QR code on terminal, and display the QR code in the terminal for scanning
+Method Generating QR code
+qrencode is a common CLI program for generating QR codes, found in many distribution repositories. It supports outputing QR code in terminal. (It also supports output to image files)
+Decoding QR code
+          
+          
+            &lt;p&gt;&lt;a href=&#34;/enblog/enblog/post/qr/&#34;&gt;Read More&lt;/a&gt;&lt;/p&gt;
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

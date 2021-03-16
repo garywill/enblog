@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>console on Gary W&#39;s English blog</title>
+    <link>/enblog/tags/console/</link>
+    <description>Recent content in console on Gary W&#39;s English blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>Copyright © All rights reserved</copyright>
+    <lastBuildDate>Tue, 12 Jun 2018 08:47:11 +0100</lastBuildDate><atom:link href="/enblog/tags/console/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Create &#39;Open Terminal Here&#39; menu for Linux file manager</title>
+      <link>/enblog/post/terminal_here/</link>
+      <pubDate>Tue, 12 Jun 2018 08:47:11 +0100</pubDate>
+      
+      <guid>/enblog/post/terminal_here/</guid>
+      <description>
+        
+          
+            Create &amp;quot;Open Terminal Here&amp;quot; menu for Linux file manager Some Linux GUI file managers do not have a right-click menu &amp;quot;Open terminal here&amp;quot;, or some have but don&#39;t allow specifying a certain terminal.
+Because folder also has MIME type ( inode/directory), by associating folder with a terminal through MIME association, we can use the right-click menu in the file manager to select the terminal you want in &amp;quot;Open With&amp;quot;. (The premise is that there is &amp;quot;Open With&amp;quot; in the right-click menu of your file manager)
+          
+          
+            &lt;p&gt;&lt;a href=&#34;/enblog/enblog/post/terminal_here/&#34;&gt;Read More&lt;/a&gt;&lt;/p&gt;
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

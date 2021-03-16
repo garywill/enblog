@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>resolv.conf on Gary W&#39;s English blog</title>
+    <link>/enblog/tags/resolv.conf/</link>
+    <description>Recent content in resolv.conf on Gary W&#39;s English blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>Copyright © All rights reserved</copyright>
+    <lastBuildDate>Sat, 17 Oct 2020 08:47:11 +0100</lastBuildDate><atom:link href="/enblog/tags/resolv.conf/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Assign DNS to one particular process on Linux</title>
+      <link>/enblog/post/dns/</link>
+      <pubDate>Sat, 17 Oct 2020 08:47:11 +0100</pubDate>
+      
+      <guid>/enblog/post/dns/</guid>
+      <description>
+        
+          
+            Linux itself can only configure system-wide DNS by /etc/resolv.conf. Here is a way to individually set DNS for a specific process, through the mount namespace without root. You only need a simple command if use a script.
+Method Bubblewrap is an unprivileged (root-free) container tool. We use bwrapcommand to use it to create a mount namespace so that the process under this namespace the see /etc/resolv.conf content overwritten by us.
+          
+          
+            &lt;p&gt;&lt;a href=&#34;/enblog/enblog/post/dns/&#34;&gt;Read More&lt;/a&gt;&lt;/p&gt;
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

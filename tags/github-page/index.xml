@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>github page on Gary W&#39;s English blog</title>
+    <link>/enblog/tags/github-page/</link>
+    <description>Recent content in github page on Gary W&#39;s English blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>Copyright © All rights reserved</copyright>
+    <lastBuildDate>Thu, 19 Dec 2019 08:47:11 +0100</lastBuildDate><atom:link href="/enblog/tags/github-page/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>A page to display many Github repos, beyond the limit of 6 repos allowed</title>
+      <link>/enblog/post/github6/</link>
+      <pubDate>Thu, 19 Dec 2019 08:47:11 +0100</pubDate>
+      
+      <guid>/enblog/post/github6/</guid>
+      <description>
+        
+          
+            Github is a platform for many people to display their work, yet the profile page only allows to pin 6 repos.
+If you have more than 6 works which you want to show:
+Choose only the 6 ones you want to show the most, and reluctantly hide the others?
+Make another website to introduce your repo one by one?
+It&#39;s better to make a Github-style window display page by yourself, using the Github API directly to fetch and display the information of each repo, so you can display as many as you want, and it also saves the trouble of re-writing additional introductions for each work.
+          
+          
+            &lt;p&gt;&lt;a href=&#34;/enblog/enblog/post/github6/&#34;&gt;Read More&lt;/a&gt;&lt;/p&gt;
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>
